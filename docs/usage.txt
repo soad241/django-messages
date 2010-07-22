@@ -1,0 +1,88 @@
+.. _ref-messages-usage:
+
+=====================
+Using django-messages
+=====================
+
+To enable django-messages in your Django project make sure it is 
+:ref:`installed <ref-messages-install>`. You can check if django-messages was 
+successfully installed by opening a python shell and running::
+
+    >>> import messages
+    >>>
+    
+If no error occured, you can assumed that the app was installed correctly.
+
+
+Edit settings
+-------------
+
+The next step is to add ``messages`` to the ``INSTALLED_APPS`` setting::
+
+    INSTALLED_APPS = (
+        ...
+        'messages',
+        ...
+    )
+
+
+Add urls
+--------
+
+To make django-messages available to your users you should include the 
+bunlded url-conf in your root url-conf. One example would be to edit
+your main ``urls.py`` and add a line like this::
+
+    urlpatterns = patterns(''
+        ...
+        (r'^messages/', include('messages.urls')),
+        ...
+    )
+    
+    
+Templates
+---------
+
+Django-messages provides some simple default templates which will get you
+started quick. The templates make the assumption that a base template with
+the name ``base.html`` exists which defines a block ``content`` and a block 
+``sidebar``. If this is not the case, or the template don't fit due to other
+concerns, it's very easy to provide to your own templates. Please see the
+:ref:`customization docs <ref-messages-customization>` fore more details.
+
+
+Templatetags and Context-Processors
+-----------------------------------
+
+Django-messages provides a Templatetag and a Template Context Processor to 
+make it easy to print the number of unread messages of a user in the templates.
+
+To use the Templatetag simply add this to your template::
+
+    {% load inbox %}
+    
+Now you can either print the number of unread messages in the users inbox by
+using::
+
+    {% inbox_count %}
+    
+Or you can assign the count to a variable to further process it in the template::
+
+    {% inbox_count as my_var %}
+    {{ my_var }}
+    
+If you want to show the inbox count on every page of your site you could also
+use the bundled Context Processor to add the value to every Template Context
+instead of loading the Templatetag. Simply add the Context Processor to the
+TEMPLATE_CONTEXT_PROCESSORS settings in your settings.py::
+
+    TEMPLATE_CONTEXT_PROCESSORS = (
+        ...
+        'messages.context_processors.inbox',
+    )
+
+And now every Template Context will contain a variable named 
+``messages_inbox_count``, if the user is logged in::
+
+    {{ messages_inbox_count }}
+
