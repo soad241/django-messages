@@ -156,8 +156,6 @@ def delete(request, message_id, success_url=None):
     if deleted:
         message.save()
         user.message_set.create(message=_(u"Message successfully deleted."))
-        if notification:
-            notification.send([user], "messages_deleted", {'message': message,})
         return HttpResponseRedirect(success_url)
     raise Http404
 delete = login_required(delete)
@@ -183,8 +181,6 @@ def undelete(request, message_id, success_url=None):
     if undeleted:
         message.save()
         user.message_set.create(message=_(u"Message successfully recovered."))
-        if notification:
-            notification.send([user], "messages_recovered", {'message': message,})
         return HttpResponseRedirect(success_url)
     raise Http404
 undelete = login_required(undelete)
