@@ -79,9 +79,14 @@ class Message(models.Model):
     get_absolute_url = models.permalink(get_absolute_url)
     
     def save(self, **kwargs):
+        created = not self.pk
         if not self.id:
             self.sent_at = datetime.datetime.now()
         super(Message, self).save(**kwargs) 
+        if created:
+            import notification.models as notification
+            notification.send([self.recipient], "messages_received", 
+                              {'message': self,})
     
     class Meta:
         ordering = ['-sent_at']

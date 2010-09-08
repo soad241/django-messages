@@ -48,7 +48,5 @@ class ComposeForm(forms.Form):
                 parent_msg.save()
             msg.save()
             message_list.append(msg)
-            if notification:
-                notification.send([r], "messages_received", {'message': msg,})
         return message_list
     
