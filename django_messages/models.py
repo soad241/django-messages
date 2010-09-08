@@ -87,6 +87,10 @@ class Message(models.Model):
             import notification.models as notification
             notification.send([self.recipient], "messages_received", 
                               {'message': self,})
+            n = notification.Notice.objects.filter(
+                user=self.recipient).order_by('-pk')[0]
+            n.unseen = False
+            n.save()
     
     class Meta:
         ordering = ['-sent_at']
