@@ -78,18 +78,6 @@ class Message(models.Model):
         return ('messages_detail', [self.id])
     get_absolute_url = models.permalink(get_absolute_url)
     
-    def get_parent_messages(self, limit=None):
-        parent_messages = []
-        msg = self
-        i = 0
-        while msg.parent_msg:
-            if limit != None and i > limit:
-                break
-            i += 1
-            msg = msg.parent_msg
-            parent_messages.append(msg)
-        return reversed(parent_messages)
-    
     def save(self, **kwargs):
         created = not self.pk
         if not self.id:

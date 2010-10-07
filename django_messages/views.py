@@ -117,12 +117,9 @@ def reply(request, message_id, form_class=ComposeForm,
                 success_url = reverse('messages_inbox')
             return HttpResponseRedirect(success_url)
     else:
-        subject = parent.subject
-        if not subject.startswith('Re:'):
-            subject = u"Re: {0}".format(subject)
         form = form_class(initial={
-            'body': '',
-            'subject': subject,
+            'body': quote_helper(parent.sender, parent.body),
+            'subject': _(u"Re: %(subject)s") % {'subject': parent.subject},
             'recipient': [parent.sender,]
             })
     return render_to_response(template_name, {
@@ -198,7 +195,6 @@ def view(request, message_id, template_name='django_messages/view.html'):
     ``read_at`` is set to the current datetime.
     """
     user = request.user
-    context = RequestContext(request)
     now = datetime.datetime.now()
     message = get_object_or_404(Message, id=message_id)
     if (message.sender != user) and (message.recipient != user):
@@ -206,9 +202,7 @@ def view(request, message_id, template_name='django_messages/view.html'):
     if message.read_at is None and message.recipient == user:
         message.read_at = now
         message.save()
-    context['messages'] = list(message.get_parent_messages(limit=10)) + \
-           [message]
     return render_to_response(template_name, {
         'message': message,
-    }, context_instance=context)
+    }, context_instance=RequestContext(request))
 view = login_required(view)
