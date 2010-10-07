@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django_messages.models import Message
 from django_messages.utils import format_subject, format_quote
+import forms
 
 
 class SendTestCase(TestCase):
@@ -121,8 +122,6 @@ class IntegrationTestCase(TestCase):
             kwargs={'message_id':pk}))
         self.assertEquals(response.status_code, 200)
         self.assertEquals(response.template[0].name, 'django_messages/compose.html')
-        self.assertEquals(response.context['form'].initial['body'], 
-                format_quote(self.user_1, self.T_MESSAGE_DATA[0]['body']))
         self.assertEqual(response.context['form'].initial['subject'],
                 u"Re: %(subject)s"%{'subject': self.T_MESSAGE_DATA[0]['subject']})
                      
@@ -135,4 +134,31 @@ class FormatTestCase(TestCase):
         self.assertEquals(format_subject(u"Re[2]: foo bar"), u"Re[3]: foo bar")
         self.assertEquals(format_subject(u"Re[10]: foo bar"), u"Re[11]: foo bar")
         
+                
+class ComposeFormTestCase(TestCase):
+    #TODO added by philip but not fully finished/working
+    def setUp(self):
+        self.user1 = User.objects.create_user('user1', 
+                                              'user1@example.com', '123456')
+        self.user2 = User.objects.create_user('user2', 
+                                              'user2@example.com', '123456')
+        self.msg1 = Message.objects.create(
+            sender=self.user1, recipient=self.user2, 
+            subject='Subject Text', body='Body Text')
+        
+    def test_parenthood(self):
+        f = forms.ComposeForm({'recipient':self.user1.username, 
+                       'subject':'subject', 'body':'email body'})
+        self.failUnless(f.is_valid())
+        msg2 = f.save(self.user2, parent_msg=self.msg1)
+        f = forms.ComposeForm({'recipient':self.user2.username, 
+                       'subject':'subject', 'body':'email body'})
+        self.failUnless(f.is_valid())
+        msg3 = f.save(self.user1, parent_msg=self.msg1)
+        f = forms.ComposeForm({'recipient':self.user2.username, 
+                       'subject':'subject', 'body':'email body'})
+        self.failUnless(f.is_valid())
+        msg4 = f.save(self.user1)
+        self.failUnlessEqual(2, Message.objects.inbox_for(self.user2).count(),
+                     "Shouldn't display message for messages that are replied")
         
