@@ -13,7 +13,7 @@ class SendTestCase(TestCase):
         self.user2 = User.objects.create_user('user2', 'user2@example.com', '123456')
         self.msg1 = Message(sender=self.user1, recipient=self.user2, subject='Subject Text', body='Body Text')
         self.msg1.save()
-        
+
     def testBasic(self):
         self.assertEquals(self.msg1.sender, self.user1)
         self.assertEquals(self.msg1.recipient, self.user2)
@@ -34,6 +34,7 @@ class DeleteTestCase(TestCase):
         self.msg2.recipient_deleted_at = datetime.datetime.now()
         self.msg1.save()
         self.msg2.save()
+        
                 
     def testBasic(self):
         self.assertEquals(Message.objects.outbox_for(self.user1).count(), 1)
@@ -69,24 +70,30 @@ class IntegrationTestCase(TestCase):
         self.c.login(username=self.T_USER_DATA[0]['username'], 
                      password=self.T_USER_DATA[0]['password'])
         
+        from main.models import FreeVipLog
+        FreeVipLog.objects.create(user=self.user_1)
+        FreeVipLog.objects.create(user=self.user_2)
+        self.user_1 = User.objects.get(pk=self.user_1.pk)
+        self.user_2 = User.objects.get(pk=self.user_2.pk)
+
     
     def testOutboxEmpty(self):
         """ request the empty outbox """
-        response = self.c.get(reverse('messages_outbox'))
+        response = self.c.get(reverse('messages_outbox'), follow=True)
         self.assertEquals(response.status_code, 200)
         self.assertEquals(response.template[0].name, 'django_messages/outbox.html')
         self.assertEquals(len(response.context['message_list']), 0)
 
     def testTrashEmpty(self):
         """ request the empty trash """
-        response = self.c.get(reverse('messages_trash'))
+        response = self.c.get(reverse('messages_trash'), follow=True)
         self.assertEquals(response.status_code, 200)
         self.assertEquals(response.template[0].name, 'django_messages/trash.html')
         self.assertEquals(len(response.context['message_list']), 0)
 
     def testCompose(self):
         """ compose a message step by step """
-        response = self.c.get(reverse('messages_compose'))
+        response = self.c.get(reverse('messages_compose'), follow=True)
         self.assertEquals(response.status_code, 200)
         self.assertEquals(response.template[0].name, 'django_messages/compose.html')
         response = self.c.post(reverse('messages_compose'),
@@ -111,14 +118,14 @@ class IntegrationTestCase(TestCase):
         # log the user_2 in and check the inbox
         self.c.login(username=self.T_USER_DATA[1]['username'], 
                      password=self.T_USER_DATA[1]['password'])
-        response = self.c.get(reverse('messages_inbox'))
+        response = self.c.get(reverse('messages_inbox'), follow=True)
         self.assertEquals(response.status_code, 200)
         self.assertEquals(response.template[0].name, 'django_messages/inbox.html')
         self.assertTrue(len(response.context['message_list']) >= 1)
         pk = getattr(response.context['message_list'][0], 'pk')
         # reply to the first message
         response = self.c.get(reverse('messages_reply', 
-            kwargs={'message_id':pk}))
+            kwargs={'message_id':pk}), follow=True)
         self.assertEquals(response.status_code, 200)
         self.assertEquals(response.template[0].name, 'django_messages/compose.html')
         self.assertEquals(response.context['form'].initial['body'], 
