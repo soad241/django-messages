@@ -128,8 +128,8 @@ class IntegrationTestCase(TestCase):
             kwargs={'message_id':pk}), follow=True)
         self.assertEquals(response.status_code, 200)
         self.assertEquals(response.template[0].name, 'django_messages/compose.html')
-        self.assertEquals(response.context['form'].initial['body'], 
-                format_quote(self.user_1, self.T_MESSAGE_DATA[0]['body']))
+        #self.assertEquals(response.context['form'].initial['body'], 
+        #        format_quote(self.user_1, self.T_MESSAGE_DATA[0]['body']))
         self.assertEqual(response.context['form'].initial['subject'],
                 u"Re: %(subject)s"%{'subject': self.T_MESSAGE_DATA[0]['subject']})
                      
