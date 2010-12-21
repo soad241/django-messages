@@ -83,7 +83,10 @@ class Message(models.Model):
         if not self.id:
             self.sent_at = datetime.datetime.now()
         super(Message, self).save(**kwargs) 
-    
+        if created:
+            import notification.models as notification
+            notification.send([self.recipient], "messages_received",
+                              {'message': self,})  
     class Meta:
         ordering = ['-sent_at']
         verbose_name = _("Message")
