@@ -117,9 +117,13 @@ def reply(request, message_id, form_class=ComposeForm,
                 success_url = reverse('messages_inbox')
             return HttpResponseRedirect(success_url)
     else:
+        if parent.subject.startswith('Re:'):
+            subject = parent.subject
+        else:
+            subject = _(u"Re: %(subject)s") % {'subject': parent.subject}
         form = form_class(initial={
             'body': quote_helper(parent.sender, parent.body),
-            'subject': _(u"Re: %(subject)s") % {'subject': parent.subject},
+            'subject': subject,
             'recipient': [parent.sender,]
             })
     return render_to_response(template_name, {
