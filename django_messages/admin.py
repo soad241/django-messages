@@ -60,7 +60,6 @@ class MessageAdmin(admin.ModelAdmin):
         }),
     )
     list_display = ('subject', 'sender', 'recipient', 'sent_at', 'read_at')
-    list_filter = ('sent_at',)
     search_fields = ('subject', 'body')
     raw_id_fields = ('recipient', 'sender', 'parent_msg')
 
