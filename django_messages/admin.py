@@ -11,6 +11,8 @@ else:
     
 from django_messages.models import Message
 
+
+
 class MessageAdminForm(forms.ModelForm):
     """
     Custom AdminForm to enable messages to groups and all users.
@@ -31,6 +33,7 @@ class MessageAdminForm(forms.ModelForm):
 
     class Meta:
         model = Message
+    
 
 class MessageAdmin(admin.ModelAdmin):
     form = MessageAdminForm
@@ -57,9 +60,13 @@ class MessageAdmin(admin.ModelAdmin):
         }),
     )
     list_display = ('subject', 'sender', 'recipient', 'sent_at', 'read_at')
-    list_filter = ('sent_at', 'sender')
+    list_filter = ('sent_at',)
     search_fields = ('subject', 'body')
     raw_id_fields = ('recipient', 'sender', 'parent_msg')
+
+    def lookup_allowed(self, lookup):
+        return True
+
 
     def save_model(self, request, obj, form, change):
         """
@@ -105,4 +112,6 @@ class MessageAdmin(admin.ModelAdmin):
                 # Notification for the recipient.
                 notification.send([user], recipients_label, {'message' : obj,})
             
+
 admin.site.register(Message, MessageAdmin)
+
