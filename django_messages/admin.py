@@ -63,7 +63,7 @@ class MessageAdmin(admin.ModelAdmin):
     search_fields = ('subject', 'body')
     raw_id_fields = ('recipient', 'sender', 'parent_msg')
 
-    def lookup_allowed(self, lookup):
+    def lookup_allowed(self, lookup, value):
         return True
 
 
