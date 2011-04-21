@@ -13,8 +13,6 @@ class InboxOutput(Node):
             if not count:
                 count = user.received_messages.filter(read_at__isnull=True, recipient_deleted_at__isnull=True).count()
                 cache.set(cache_key, str(count), 600)
-            else:
-                count = cache.get(cache_key)
         except (KeyError, AttributeError):
             count = ''
         if self.varname is not None:
