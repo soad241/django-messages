@@ -1,4 +1,5 @@
 from django.template import Library, Node, TemplateSyntaxError
+from django.core.cache import cache
 
 class InboxOutput(Node):
     def __init__(self, varname=None):
@@ -7,7 +8,13 @@ class InboxOutput(Node):
     def render(self, context):
         try:
             user = context['user']
-            count = user.received_messages.filter(read_at__isnull=True, recipient_deleted_at__isnull=True).count()
+            cache_key = '{0}_{1}'.format(user.username, 'inbox_count_cache')
+            count = cache.get(cache_key)
+            if not count:
+                count = user.received_messages.filter(read_at__isnull=True, recipient_deleted_at__isnull=True).count()
+                cache.set(cache_key, str(count), 600)
+            else:
+                count = cache.get(cache_key)
         except (KeyError, AttributeError):
             count = ''
         if self.varname is not None:
