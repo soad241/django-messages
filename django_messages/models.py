@@ -88,7 +88,7 @@ class Message(models.Model):
             notification.send([self.recipient], "messages_received",
                               {'message': self,})  
     class Meta:
-        ordering = ['-sent_at']
+        ordering = ['-id']
         verbose_name = _("Message")
         verbose_name_plural = _("Messages")
         
