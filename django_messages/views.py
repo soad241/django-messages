@@ -74,8 +74,8 @@ def compose(request, recipient=None, form_class=ComposeForm,
         form = form_class(request.POST, recipient_filter=recipient_filter)
         if form.is_valid():
             form.save(sender=request.user)
-            request.user.message_set.create(
-                message=_(u"Message successfully sent."))
+            messages.add_message(request, messages.INFO, 
+                _(u"Message successfully sent."))
             if success_url is None:
                 success_url = reverse('messages_inbox')
             if request.GET.has_key('next'):
@@ -113,8 +113,8 @@ def reply(request, message_id, form_class=ComposeForm,
         form = form_class(request.POST, recipient_filter=recipient_filter)
         if form.is_valid():
             form.save(sender=request.user, parent_msg=parent)
-            request.user.message_set.create(
-                message=_(u"Message successfully sent."))
+            messages.add_message(request, messages.INFO, 
+                _(u"Message successfully sent."))
             if success_url is None:
                 success_url = reverse('messages_inbox')
             return HttpResponseRedirect(success_url)
@@ -161,7 +161,8 @@ def delete(request, message_id, success_url=None):
         deleted = True
     if deleted:
         message.save()
-        user.message_set.create(message=_(u"Message successfully deleted."))
+        messages.add_message(request, messages.INFO,
+             _(u"Message successfully deleted."))
         return HttpResponseRedirect(success_url)
     raise Http404
 delete = login_required(delete)
@@ -186,7 +187,8 @@ def undelete(request, message_id, success_url=None):
         undeleted = True
     if undeleted:
         message.save()
-        user.message_set.create(message=_(u"Message successfully recovered."))
+        messages.add_message(request, messages.INFO, 
+            _(u"Message successfully recovered."))
         return HttpResponseRedirect(success_url)
     raise Http404
 undelete = login_required(undelete)
