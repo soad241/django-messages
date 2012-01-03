@@ -62,8 +62,8 @@ def compose(request, recipient=None, form_class=ComposeForm,
     Displays and handles the ``form_class`` form to compose new messages.
     Required Arguments: None
     Optional Arguments:
-        ``recipient``: username of a `django.contrib.auth` User, who should
-                       receive the message, optionally multiple usernames
+        ``recipient``: username or id of a `django.contrib.auth` User, who should
+                       receive the message, optionally multiple usernames/ids
                        could be separated by a '+'
         ``form_class``: the form-class to use
         ``template_name``: the template to use
@@ -85,6 +85,8 @@ def compose(request, recipient=None, form_class=ComposeForm,
         form = form_class()
         if recipient is not None:
             recipients = [u for u in User.objects.filter(username__in=[r.strip() for r in recipient.split('+')])]
+            if not recipients:
+                recipients = [u for u in User.objects.filter(pk__in=[pk for pk in recipient.split('+')])]
             form.fields['recipient'].initial = recipients
     return render_to_response(template_name, {
         'form': form,
