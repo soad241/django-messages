@@ -12,6 +12,7 @@ from django.conf import settings
 from django_messages.models import Message
 from django_messages.forms import ComposeForm
 from django_messages.utils import format_quote
+from django.contrib import messages
 
 if "notification" in settings.INSTALLED_APPS:
     from notification import models as notification
